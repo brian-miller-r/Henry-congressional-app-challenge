@@ -1,10 +1,10 @@
-# 📚 Study Streak Motivator
+# 📚 Study Buddy
 
 A gamified study tracking web app designed for 6th grade students participating in the Congressional App Challenge 2025.
 
 ## 🎯 Project Overview
 
-Study Streak Motivator helps students build consistent study habits through gamification. Students can track daily study sessions, maintain streaks, unlock achievement badges, and monitor their progress through an intuitive dashboard.
+Study Buddy helps students build consistent study habits through gamification. Students can track daily study sessions, maintain streaks, unlock achievement badges, and monitor their progress through an intuitive dashboard.
 
 ## ✨ Features (Planned)
 
@@ -78,14 +78,12 @@ study-streak-motivator/
 
 ## 🛠 Development Phases
 
-### ✅ Phase 1: Project Setup & Basic Structure (COMPLETE)
+###  Phase 1: Project Setup & Basic Structure (COMPLETE)
 - [x] Virtual environment setup
 - [x] Flask application initialization
 - [x] Basic HTML templates and navigation
 - [x] Responsive CSS styling
 - [x] Project documentation
-
-### 📋 Upcoming Phases
 
 **Phase 2: Database Models & Setup**
 - SQLAlchemy models (User, StudySession, Streak, Badge)
@@ -152,25 +150,6 @@ This project is built for educational purposes as part of the Congressional App 
 
 This project is created for educational purposes for the Congressional App Challenge 2025.
 
-## 🆘 Troubleshooting
-
-### Common Issues:
-
-1. **"Command not found" errors:**
-   - Make sure Python 3.9+ is installed
-   - Verify virtual environment is activated
-
-2. **Module import errors:**
-   - Ensure virtual environment is activated
-   - Run `pip install -r requirements.txt`
-
-3. **Port already in use:**
-   - Change port in app.py: `app.run(debug=True, port=5001)`
-
-4. **CSS/Static files not loading:**
-   - Check that static/css/style.css exists
-   - Verify Flask is serving static files correctly
-
 ## 🎯 Learning Objectives
 
 Through building this project, students will learn:
@@ -181,7 +160,3 @@ Through building this project, students will learn:
 - Date/time handling in Python
 - Algorithm design (streak calculation)
 - Testing and debugging techniques
-
----
-
-Built with ❤️ for the Congressional App Challenge 2025
