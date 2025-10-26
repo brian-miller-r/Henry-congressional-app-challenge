@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Study Streak Motivator{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <h1 class="page-title">📊 Your Study Dashboard</h1>
+        <p class="page-subtitle">Track your progress and celebrate your achievements!</p>
+        
+        <!-- Real database data from Phase 2 -->
+        {% if data %}
+        <div class="dashboard-placeholder stagger-animation">
+            <div class="placeholder-card animate-on-scroll{% if data.streak_status == 'at_risk' %} streak-at-risk{% elif data.streak_status == 'broken_today' %} streak-broken{% elif data.has_studied_today %} streak-active{% endif %}">
+                <h2>🔥 Current Streak</h2>
+                <div class="streak-info">
+                    <div class="placeholder-stat animated-counter" data-target="{{ data.current_streak }}">{{ data.current_streak }}</div>
+                    {% if data.longest_streak > data.current_streak %}
+                        <p class="streak-record">Personal Best: {{ data.longest_streak }} days</p>
+                    {% elif data.current_streak > 0 %}
+                        <p class="streak-record">🎉 Personal Record!</p>
+                    {% endif %}
+                </div>
+                <p class="streak-message">{{ data.streak_message }}</p>
+                {% if data.has_studied_today %}
+                    <p class="today-study">✅ Studied {{ data.today_study_minutes }} minutes today</p>
+                {% else %}
+                    <p class="today-study">⏰ No study time logged today</p>
+                {% endif %}
+            </div>
+            
+            <div class="placeholder-card animate-on-scroll">
+                <h2>🏆 Badges Earned</h2>
+                <p><span class="animated-counter" data-target="{{ data.earned_badges|length }}">{{ data.earned_badges|length }}</span> achievement{{ 's' if data.earned_badges|length != 1 else '' }} unlocked!</p>
+                {% if data.earned_badges %}
+                    <div style="margin-top: 1rem;">
+                        {% for badge in data.earned_badges[:3] %}
+                            <span style="font-size: 1.5rem; margin: 0 0.5rem;" title="{{ badge.name }}: {{ badge.description }}">{{ badge.icon }}</span>
+                        {% endfor %}
+                        {% if data.earned_badges|length > 3 %}
+                            <span style="color: #6c757d;">+{{ data.earned_badges|length - 3 }} more</span>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p style="color: #6c757d; font-style: italic;">Complete your first study session to earn badges!</p>
+                {% endif %}
+            </div>
+            
+            <div class="placeholder-card animate-on-scroll">
+                <h2>📈 Study Statistics</h2>
+                <p>Total: <span class="animated-counter" data-target="{{ data.total_study_time }}">{{ data.total_study_time }}</span> minutes (<span class="animated-counter" data-target="{{ (data.total_study_time / 60)|round(1) }}">{{ (data.total_study_time / 60)|round(1) }}</span> hours)</p>
+                <div class="placeholder-stat animated-counter" data-target="{{ data.total_sessions }}">{{ data.total_sessions }}</div>
+                <p style="margin-top: 0.5rem; color: #6c757d;">This week: {{ data.weekly_study_time }} minutes</p>
+            </div>
+        </div>
+        
+        {% if data.subject_stats %}
+        <div style="margin: 2rem 0;">
+            <h3 style="text-align: center; margin-bottom: 1.5rem; color: #333;">📚 Subject Breakdown (Last 30 Days)</h3>
+            <div class="dashboard-placeholder stagger-animation">
+                {% for stat in data.subject_stats %}
+                <div class="placeholder-card animate-on-scroll" style="text-align: left;">
+                    <h4 style="color: #4285f4; margin-bottom: 0.5rem;">{{ stat.subject }}</h4>
+                    <p><strong><span class="animated-counter" data-target="{{ stat.total_minutes }}">{{ stat.total_minutes }}</span> minutes</strong> (<span class="animated-counter" data-target="{{ (stat.total_minutes / 60)|round(1) }}">{{ (stat.total_minutes / 60)|round(1) }}</span> hours)</p>
+                    <p style="color: #6c757d;">{{ stat.session_count }} session{{ 's' if stat.session_count != 1 else '' }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if data.recent_sessions %}
+        <div style="margin: 2rem 0;">
+            <h3 style="text-align: center; margin-bottom: 1.5rem; color: #333;">📝 Recent Sessions</h3>
+            <div style="background: white; border-radius: 15px; padding: 1.5rem; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);">
+                {% for session in data.recent_sessions[:5] %}
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #e9ecef;">
+                    <div>
+                        <strong style="color: #333;">{{ session.subject }}</strong>
+                        <span style="color: #6c757d; margin-left: 1rem;">{{ session.session_date.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="color: #34a853; font-weight: 600;">{{ session.duration_minutes }} min</span>
+                        {% if session.completed %}
+                            <span style="color: #34a853; margin-left: 0.5rem;">✓</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="dashboard-placeholder">
+            <div class="placeholder-card">
+                <h2>⚠️ No Data Found</h2>
+                <p>Please initialize the database first by visiting <a href="{{ url_for('init_database') }}">/init-db</a></p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="dashboard-actions">
+            <a href="{{ url_for('timer') }}" class="btn btn-primary">
+                🎯 Start New Study Session
+            </a>
+            <a href="{{ url_for('dashboard_enhanced') }}" class="btn btn-secondary">
+                📈 Advanced Analytics
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline">
+                🏠 Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

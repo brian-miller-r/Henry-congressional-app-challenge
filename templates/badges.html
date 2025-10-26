@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+
+{% block title %}Badge Collection - Study Streak Motivator{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <h1 class="page-title">🏆 Badge Collection</h1>
+        <p class="page-subtitle">Show off your achievements and unlock new challenges!</p>
+        
+        {% if badges %}
+        <!-- Badge Stats Overview -->
+        <div class="stats-overview stagger-animation">
+            <div class="stat-card animate-on-scroll">
+                <div class="stat-icon">🏅</div>
+                <div class="stat-content">
+                    <div class="stat-number animated-counter" data-target="{{ earned_badges|length }}">{{ earned_badges|length }}</div>
+                    <div class="stat-label">Earned</div>
+                    <div class="stat-sublabel">Out of {{ badges|length }} total</div>
+                </div>
+            </div>
+            
+            <div class="stat-card animate-on-scroll">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-content">
+                    <div class="stat-number animated-counter" data-target="{{ total_points }}">{{ total_points }}</div>
+                    <div class="stat-label">Badge Points</div>
+                    <div class="stat-sublabel">Achievement Score</div>
+                </div>
+            </div>
+            
+            <div class="stat-card animate-on-scroll">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                    <div class="stat-number animated-counter" data-target="{{ completion_percentage }}">{{ completion_percentage }}</div>
+                    <div class="stat-label">% Complete</div>
+                    <div class="stat-sublabel">Collection Progress</div>
+                </div>
+            </div>
+            
+            <div class="stat-card animate-on-scroll">
+                <div class="stat-icon">💎</div>
+                <div class="stat-content">
+                    <div class="stat-number animated-counter" data-target="{{ rare_badges_count }}">{{ rare_badges_count }}</div>
+                    <div class="stat-label">Rare+</div>
+                    <div class="stat-sublabel">Epic & Legendary</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Badge Categories -->
+        <div class="dashboard-section">
+            <div class="badge-filters">
+                <button class="filter-btn active" data-category="all">All Badges</button>
+                <button class="filter-btn" data-category="streaks">🔥 Streaks</button>
+                <button class="filter-btn" data-category="time">⏱️ Time</button>
+                <button class="filter-btn" data-category="consistency">📅 Consistency</button>
+                <button class="filter-btn" data-category="subjects">📚 Subjects</button>
+                <button class="filter-btn" data-category="special">✨ Special</button>
+            </div>
+        </div>
+
+        <!-- Badge Grid -->
+        <div class="badge-collection-grid stagger-animation">
+            {% for badge in badges %}
+            <div class="badge-card animate-on-scroll {{ badge.rarity|lower }} {{ badge.category }}" 
+                 data-category="{{ badge.category }}"
+                 data-badge-earned="{% if badge.id in earned_badge_ids %}true{% else %}false{% endif %}"
+                 data-badge-name="{{ badge.name }}">
+                
+                <div class="badge-card-inner">
+                    <!-- Badge Icon -->
+                    <div class="badge-icon-container">
+                        {% if badge.id in earned_badge_ids %}
+                        <div class="badge-icon earned {{ badge.rarity|lower }}">{{ badge.icon }}</div>
+                        {% else %}
+                        <div class="badge-icon locked">🔒</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Badge Info -->
+                    <div class="badge-info">
+                        <h3 class="badge-name">{{ badge.name }}</h3>
+                        <p class="badge-description">
+                            {% if badge.id in earned_badge_ids %}
+                                {{ badge.description }}
+                            {% elif badge.secret %}
+                                🤫 Secret Badge - Keep studying to discover!
+                            {% else %}
+                                {{ badge.description }}
+                            {% endif %}
+                        </p>
+                        
+                        <!-- Badge Metadata -->
+                        <div class="badge-metadata">
+                            <span class="badge-category-tag">{{ badge.category|title }}</span>
+                            <span class="badge-rarity {{ badge.rarity|lower }}">{{ badge.rarity|title }}</span>
+                            <span class="badge-points">{{ badge.points }} pts</span>
+                        </div>
+                        
+                        <!-- Earned Date -->
+                        {% if badge.id in earned_badge_ids %}
+                        <div class="badge-earned-date">
+                            Earned: {{ earned_badges_dict[badge.id].earned_at.strftime('%b %d, %Y') }}
+                        </div>
+                        {% else %}
+                        <!-- Progress Hint -->
+                        <div class="badge-progress-hint">
+                            {% if not badge.secret %}
+                            <small>{{ badge.criteria_display or 'Complete the challenge to unlock!' }}</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Shine effect for rare badges -->
+                {% if badge.rarity in ['epic', 'legendary'] %}
+                <div class="badge-shine"></div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <!-- No badges state -->
+        <div class="no-data-state">
+            <div class="no-data-card animate-on-scroll">
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+                <h2>Start Your Badge Collection!</h2>
+                <p>Complete study sessions to unlock your first achievement badges.</p>
+                <a href="{{ url_for('timer') }}" class="btn btn-primary btn-lg">🎯 Start Studying</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Navigation -->
+        <div class="dashboard-actions">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                📊 Back to Dashboard
+            </a>
+            <a href="{{ url_for('timer') }}" class="btn btn-secondary">
+                🎯 Study Now
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Badge Collection Styles -->
+<style>
+.badge-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.filter-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--primary-blue);
+    background: white;
+    color: var(--primary-blue);
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: var(--primary-blue);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.badge-collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.badge-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.badge-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.badge-card.locked {
+    opacity: 0.6;
+    filter: grayscale(0.3);
+}
+
+.badge-card.epic {
+    border: 2px solid #9c27b0;
+}
+
+.badge-card.legendary {
+    border: 2px solid #ff9800;
+    background: linear-gradient(135deg, #fff9e1 0%, #ffffff 100%);
+}
+
+.badge-card-inner {
+    padding: 2rem;
+    text-align: center;
+}
+
+.badge-icon-container {
+    margin-bottom: 1.5rem;
+}
+
+.badge-icon {
+    font-size: 4rem;
+    display: inline-block;
+    padding: 1rem;
+    border-radius: 50%;
+    background: var(--light-gray);
+    transition: all 0.3s ease;
+}
+
+.badge-icon.earned {
+    background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+    color: white;
+    box-shadow: 0 8px 25px rgba(66, 133, 244, 0.3);
+}
+
+.badge-icon.earned.rare {
+    background: linear-gradient(135deg, #673ab7, #9c27b0);
+}
+
+.badge-icon.earned.epic {
+    background: linear-gradient(135deg, #9c27b0, #e91e63);
+    animation: pulse 2s infinite;
+}
+
+.badge-icon.earned.legendary {
+    background: linear-gradient(135deg, #ff9800, #f44336);
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 30px rgba(255, 152, 0, 0.5);
+}
+
+.badge-icon.locked {
+    background: #ddd;
+    color: #999;
+}
+
+.badge-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+}
+
+.badge-description {
+    color: var(--text-light);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.badge-metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.badge-category-tag,
+.badge-rarity,
+.badge-points {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-weight: 600;
+}
+
+.badge-category-tag {
+    background: var(--light-gray);
+    color: var(--text-dark);
+}
+
+.badge-rarity {
+    color: white;
+}
+
+.badge-rarity.common {
+    background: #607d8b;
+}
+
+.badge-rarity.rare {
+    background: #673ab7;
+}
+
+.badge-rarity.epic {
+    background: #9c27b0;
+}
+
+.badge-rarity.legendary {
+    background: #ff9800;
+}
+
+.badge-points {
+    background: var(--primary-green);
+    color: white;
+}
+
+.badge-earned-date {
+    font-size: 0.85rem;
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+.badge-progress-hint {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.badge-shine {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shine 3s infinite;
+    pointer-events: none;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(30deg); }
+}
+
+/* Filter animations */
+.badge-card.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    .badge-collection-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<!-- Badge Collection JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const badgeCards = document.querySelectorAll('.badge-card');
+    
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update active button
+            filterButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const category = this.dataset.category;
+            
+            // Filter badges
+            badgeCards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        });
+    });
+    
+    // Only celebrate badges when clicked (not automatically)
+    const earnedBadges = document.querySelectorAll('[data-badge-earned="true"]');
+    earnedBadges.forEach((badge) => {
+        badge.addEventListener('click', function() {
+            if (window.animationEngine) {
+                window.animationEngine.celebrateBadge(this);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

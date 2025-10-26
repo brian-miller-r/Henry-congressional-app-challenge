@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Study Buddy{% endblock %}</title>
+    
+    <!-- Accessibility Meta Tags -->
+    <meta name="theme-color" content="#4285f4">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Critical CSS inlined for performance -->
+    <style>
+        {% include 'critical_css.html' %}
+    </style>
+    
+    <!-- Non-critical CSS loaded asynchronously -->
+    <link rel="preload" href="{{ url_for('static', filename='css/style.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></noscript>
+    
+    <!-- Phase 7 Animation System -->
+    <script src="{{ url_for('static', filename='js/animations.js') }}" defer></script>
+    
+    <!-- Resource hints for performance -->
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="preconnect" href="//cdn.jsdelivr.net" crossorigin>
+</head>
+    
+    <!-- Meta tags for better SEO and mobile experience -->
+    <meta name="description" content="Gamified study tracking app to help students build consistent study habits">
+    <meta name="author" content="Congressional App Challenge 2025">
+    
+    <!-- Favicon (using emoji as simple favicon) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+</head>
+<body>
+    <!-- Skip Navigation for Accessibility -->
+    <a href="#main-content" class="skip-nav">Skip to main content</a>
+    
+    <!-- Navigation Header -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <!-- App Logo/Name -->
+            <a href="{{ url_for('index') }}" class="nav-logo" aria-label="Study Buddy - Go to homepage">
+                📚 Study Buddy
+            </a>
+            
+            <!-- Navigation Menu -->
+            <div class="nav-menu" role="menubar" aria-label="Main menu">
+                <a href="{{ url_for('index') }}" class="nav-link" role="menuitem">Home</a>
+                <a href="{{ url_for('dashboard') }}" class="nav-link" role="menuitem">Dashboard</a>
+                <a href="{{ url_for('study_history') }}" class="nav-link" role="menuitem">History</a>
+                <a href="{{ url_for('dashboard_enhanced') }}" class="nav-link" role="menuitem">Analytics</a>
+                <a href="{{ url_for('timer') }}" class="nav-link" role="menuitem">Study Timer</a>
+                <a href="{{ url_for('badges') }}" class="nav-link" role="menuitem" aria-label="Badge Collection">🏆 Badges</a>
+            </div>
+            
+            <!-- Mobile Menu Toggle (for responsive design) -->
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="nav-menu">
+                <span class="bar" aria-hidden="true"></span>
+                <span class="bar" aria-hidden="true"></span>
+                <span class="bar" aria-hidden="true"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content" role="main" aria-label="Main content" id="main-content">
+        <!-- Flash Messages for User Feedback -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages" role="alert" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}" role="alert">
+                            {{ message }}
+                            <button class="flash-close" onclick="this.parentElement.remove()" aria-label="Close notification">×</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Content Block - Each page will fill this -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Study Buddy | Congressional App Challenge</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for mobile menu toggle -->
+    <script>
+        // Mobile menu toggle functionality
+        const navToggle = document.getElementById('nav-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+
+        navToggle.addEventListener('click', function() {
+            const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+            navMenu.classList.toggle('nav-menu-active');
+            navToggle.classList.toggle('nav-toggle-active');
+            navToggle.setAttribute('aria-expanded', !isExpanded);
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('nav-menu-active');
+                navToggle.classList.remove('nav-toggle-active');
+                navToggle.setAttribute('aria-expanded', 'false');
+            });
+        });
+        
+        // Close mobile menu on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && navMenu.classList.contains('nav-menu-active')) {
+                navMenu.classList.remove('nav-menu-active');
+                navToggle.classList.remove('nav-toggle-active');
+                navToggle.setAttribute('aria-expanded', 'false');
+                navToggle.focus();
+            }
+        });
+    </script>
+
+    <!-- Global Timer System - loaded async -->
+    <script src="{{ url_for('static', filename='js/global-timer.js') }}" defer></script>
+    
+    <!-- Block for additional JavaScript -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

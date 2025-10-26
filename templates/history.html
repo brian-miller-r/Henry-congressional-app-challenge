@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Study History - Study Streak Motivator{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <h1 class="page-title">📚 Study Session History</h1>
+        <p class="page-subtitle">Review your learning journey and track your progress over time</p>
+        
+        {% if data and data.sessions %}
+        <!-- Filter Controls -->
+        <div class="history-filters">
+            <div class="filter-group">
+                <label for="subjectFilter">Subject:</label>
+                <select id="subjectFilter" class="filter-select">
+                    <option value="">All Subjects</option>
+                    {% for subject in data.subjects %}
+                    <option value="{{ subject }}">{{ subject }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="dateFilter">Date Range:</label>
+                <select id="dateFilter" class="filter-select">
+                    <option value="all">All Time</option>
+                    <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 3 Months</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="searchFilter">Search:</label>
+                <input type="text" id="searchFilter" class="filter-input" placeholder="Search sessions...">
+            </div>
+            
+            <button id="clearFilters" class="btn btn-outline">Clear Filters</button>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="history-summary">
+            <div class="summary-card">
+                <div class="summary-icon">📊</div>
+                <div class="summary-content">
+                    <div class="summary-number" id="totalSessions">{{ data.sessions|length }}</div>
+                    <div class="summary-label">Total Sessions</div>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon">⏱️</div>
+                <div class="summary-content">
+                    <div class="summary-number" id="totalTime">{{ data.total_time }}</div>
+                    <div class="summary-label">Total Minutes</div>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon">📈</div>
+                <div class="summary-content">
+                    <div class="summary-number" id="avgSession">{{ (data.total_time / data.sessions|length)|round(1) if data.sessions|length > 0 else 0 }}</div>
+                    <div class="summary-label">Avg per Session</div>
+                </div>
+            </div>
+            
+            <div class="summary-card">
+                <div class="summary-icon">✅</div>
+                <div class="summary-content">
+                    <div class="summary-number" id="completedSessions">{{ data.completed_count }}</div>
+                    <div class="summary-label">Completed</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sessions Table -->
+        <div class="history-table-container">
+            <div class="table-header">
+                <h3>Session Details</h3>
+                <div class="table-controls">
+                    <button id="exportBtn" class="btn btn-secondary btn-sm">📤 Export</button>
+                </div>
+            </div>
+            
+            <div class="sessions-table-wrapper">
+                <table class="sessions-table" id="sessionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Subject</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Time Started</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sessionsTableBody">
+                        {% for session in data.sessions %}
+                        <tr class="session-row" data-subject="{{ session.subject }}" data-date="{{ session.session_date.isoformat() }}" data-completed="{{ session.completed|lower }}">
+                            <td class="session-date">{{ session.session_date.strftime('%m/%d/%Y') }}</td>
+                            <td class="session-subject">
+                                <span class="subject-tag subject-{{ session.subject.lower() }}">{{ session.subject }}</span>
+                            </td>
+                            <td class="session-duration">
+                                <span class="duration-value">{{ session.duration_minutes }}</span>
+                                <span class="duration-unit">min</span>
+                            </td>
+                            <td class="session-status">
+                                {% if session.completed %}
+                                    <span class="status-badge completed">✅ Completed</span>
+                                {% else %}
+                                    <span class="status-badge incomplete">⏸️ Incomplete</span>
+                                {% endif %}
+                            </td>
+                            <td class="session-time">
+                                {% if session.start_time %}
+                                    {{ session.start_time.strftime('%I:%M %p') }}
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td class="session-notes">
+                                {% if session.notes %}
+                                    <span class="notes-preview" title="{{ session.notes }}">{{ session.notes[:50] }}{% if session.notes|length > 50 %}...{% endif %}</span>
+                                {% else %}
+                                    <span class="text-muted">No notes</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="table-pagination" id="tablePagination">
+            <div class="pagination-info">
+                <span id="paginationInfo">Showing 1-{{ data.sessions|length }} of {{ data.sessions|length }} sessions</span>
+            </div>
+            <div class="pagination-controls">
+                <button id="prevPage" class="btn btn-outline btn-sm" disabled>Previous</button>
+                <span id="pageNumbers" class="page-numbers">1</span>
+                <button id="nextPage" class="btn btn-outline btn-sm" disabled>Next</button>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- No Data State -->
+        <div class="no-data-state">
+            <div class="no-data-card">
+                <h2>📚 No Study Sessions Yet</h2>
+                <p>Start tracking your study sessions to see your history here.</p>
+                <a href="{{ url_for('timer') }}" class="btn btn-primary">Start Your First Session</a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Action Buttons -->
+        <div class="dashboard-actions">
+            <a href="{{ url_for('timer') }}" class="btn btn-primary">
+                🎯 Start New Session
+            </a>
+            <a href="{{ url_for('dashboard_enhanced') }}" class="btn btn-secondary">
+                📈 View Analytics
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                📊 Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Study History JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const subjectFilter = document.getElementById('subjectFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const searchFilter = document.getElementById('searchFilter');
+    const clearFilters = document.getElementById('clearFilters');
+    const sessionsTable = document.getElementById('sessionsTable');
+    const exportBtn = document.getElementById('exportBtn');
+    
+    let allRows = Array.from(document.querySelectorAll('.session-row'));
+    let filteredRows = allRows;
+    
+    // Filter functions
+    function applyFilters() {
+        const subjectValue = subjectFilter.value.toLowerCase();
+        const dateValue = parseInt(dateFilter.value);
+        const searchValue = searchFilter.value.toLowerCase();
+        const today = new Date();
+        
+        filteredRows = allRows.filter(row => {
+            // Subject filter
+            if (subjectValue && !row.dataset.subject.toLowerCase().includes(subjectValue)) {
+                return false;
+            }
+            
+            // Date filter
+            if (dateValue && dateValue !== 'all') {
+                const rowDate = new Date(row.dataset.date);
+                const daysDiff = (today - rowDate) / (1000 * 60 * 60 * 24);
+                if (daysDiff > dateValue) {
+                    return false;
+                }
+            }
+            
+            // Search filter
+            if (searchValue) {
+                const rowText = row.textContent.toLowerCase();
+                if (!rowText.includes(searchValue)) {
+                    return false;
+                }
+            }
+            
+            return true;
+        });
+        
+        updateTable();
+        updateSummary();
+    }
+    
+    function updateTable() {
+        // Hide all rows
+        allRows.forEach(row => {
+            row.style.display = 'none';
+        });
+        
+        // Show filtered rows
+        filteredRows.forEach(row => {
+            row.style.display = 'table-row';
+        });
+        
+        // Update pagination info
+        const totalShowing = filteredRows.length;
+        const paginationInfo = document.getElementById('paginationInfo');
+        if (paginationInfo) {
+            paginationInfo.textContent = `Showing ${totalShowing} of ${allRows.length} sessions`;
+        }
+    }
+    
+    function updateSummary() {
+        const totalSessions = filteredRows.length;
+        const totalTime = filteredRows.reduce((sum, row) => {
+            const duration = parseInt(row.querySelector('.duration-value').textContent);
+            return sum + duration;
+        }, 0);
+        const completedCount = filteredRows.filter(row => row.dataset.completed === 'true').length;
+        const avgSession = totalSessions > 0 ? (totalTime / totalSessions).toFixed(1) : 0;
+        
+        document.getElementById('totalSessions').textContent = totalSessions;
+        document.getElementById('totalTime').textContent = totalTime;
+        document.getElementById('avgSession').textContent = avgSession;
+        document.getElementById('completedSessions').textContent = completedCount;
+    }
+    
+    function clearAllFilters() {
+        subjectFilter.value = '';
+        dateFilter.value = 'all';
+        searchFilter.value = '';
+        applyFilters();
+    }
+    
+    function exportData() {
+        const csvContent = generateCSV();
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `study-history-${new Date().toISOString().slice(0, 10)}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    function generateCSV() {
+        const headers = ['Date', 'Subject', 'Duration (min)', 'Status', 'Time Started', 'Notes'];
+        const csvRows = [headers.join(',')];
+        
+        filteredRows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const rowData = Array.from(cells).map(cell => {
+                let text = cell.textContent.trim();
+                // Clean up the text and escape commas
+                text = text.replace(/"/g, '""');
+                if (text.includes(',') || text.includes('"')) {
+                    text = `"${text}"`;
+                }
+                return text;
+            });
+            csvRows.push(rowData.join(','));
+        });
+        
+        return csvRows.join('\n');
+    }
+    
+    // Event listeners
+    if (subjectFilter) subjectFilter.addEventListener('change', applyFilters);
+    if (dateFilter) dateFilter.addEventListener('change', applyFilters);
+    if (searchFilter) searchFilter.addEventListener('input', applyFilters);
+    if (clearFilters) clearFilters.addEventListener('click', clearAllFilters);
+    if (exportBtn) exportBtn.addEventListener('click', exportData);
+    
+    // Initial load
+    applyFilters();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block title %}Study Timer - Study Streak Motivator{% endblock %}
+
+{% block content %}
+<div class="timer-container">
+    <div class="container">
+        <h1 class="page-title">⏰ Study Timer</h1>
+        <p class="page-subtitle">Focus on your studies and build your streak!</p>
+        
+        <!-- Timer Settings -->
+        <div class="timer-settings">
+            <div class="setting-group">
+                <label for="subject-select">📚 Subject:</label>
+                <select id="subject-select" class="form-select">
+                    <option value="Math">Math</option>
+                    <option value="Science">Science</option>
+                    <option value="English">English</option>
+                    <option value="History">History</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="setting-group">
+                <label for="duration-select">⏱️ Duration:</label>
+                <select id="duration-select" class="form-select">
+                    <option value="5">5 minutes</option>
+                    <option value="10">10 minutes</option>
+                    <option value="15">15 minutes</option>
+                    <option value="20">20 minutes</option>
+                    <option value="25" selected>25 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="45">45 minutes</option>
+                    <option value="60">60 minutes</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Main Timer Display -->
+        <div class="timer-main">
+            <div class="timer-circle">
+                <div id="progress-bar" class="progress-ring">
+                    <div id="progress-fill" class="progress-ring-fill"></div>
+                </div>
+                <div id="time-display" class="timer-display">25:00</div>
+            </div>
+            
+            <div id="status-text" class="timer-status">Ready to start your study session! 📚</div>
+            <div id="session-info" class="session-info"></div>
+        </div>
+        
+        <!-- Timer Controls -->
+        <div class="timer-controls">
+            <button id="start-btn" class="btn btn-primary btn-large">
+                ▶️ Start
+            </button>
+            <button id="pause-btn" class="btn btn-secondary" disabled>
+                ⏸️ Pause
+            </button>
+            <button id="stop-btn" class="btn btn-warning" disabled>
+                ⏹️ Stop
+            </button>
+            <button id="reset-btn" class="btn btn-secondary">
+                🔄 Reset
+            </button>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="timer-actions">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                📊 View Dashboard
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline">
+                🏠 Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Completion Modal -->
+<div id="modal-overlay" class="modal-overlay" style="display: none;"></div>
+<div id="completion-modal" class="completion-modal" style="display: none;">
+    <div class="modal-header">
+        <h2 id="modal-title">🎉 Session Complete!</h2>
+        <button id="modal-close-btn" class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body">
+        <div id="modal-content"></div>
+        <div id="modal-badges"></div>
+    </div>
+    <div class="modal-footer">
+        <button onclick="window.timer?.closeModal()" class="btn btn-primary">Continue</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/timer-simple.js', v=asset_version) }}"></script>
+<style>
+/* Additional timer-specific styles */
+.timer-settings {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.setting-group label {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.form-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--medium-gray);
+    border-radius: 10px;
+    font-size: 1rem;
+    background: white;
+    min-width: 150px;
+    transition: border-color 0.3s ease;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+}
+
+.timer-main {
+    text-align: center;
+    margin: 3rem 0;
+}
+
+.timer-circle {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 2rem;
+}
+
+.progress-ring {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: conic-gradient(var(--primary-blue) 0deg, var(--medium-gray) 0deg);
+    padding: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.progress-ring-fill {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.timer-display {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    font-family: 'Courier New', monospace;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.timer-status {
+    font-size: 1.2rem;
+    margin: 1rem 0;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.session-info {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--light-gray);
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.session-details {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.session-subject {
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+
+.session-duration {
+    color: var(--text-light);
+}
+
+.timer-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.timer-controls .btn {
+    min-width: 120px;
+}
+
+.timer-actions {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--medium-gray);
+}
+
+.timer-actions .btn {
+    margin: 0 0.5rem;
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
+}
+
+.btn-outline:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.btn-warning {
+    background: var(--primary-orange);
+    color: var(--text-dark);
+}
+
+.btn-warning:hover {
+    background: #e6a905;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.completion-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    z-index: 2001;
+    min-width: 400px;
+    max-width: 500px;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.modal-header {
+    padding: 2rem 2rem 1rem;
+    text-align: center;
+    position: relative;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: var(--text-dark);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    padding: 1rem 2rem 2rem;
+    text-align: center;
+}
+
+.new-badge {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--light-gray);
+    border-radius: 10px;
+    border-left: 4px solid var(--primary-green);
+}
+
+.badge-icon {
+    font-size: 2rem;
+}
+
+.badge-name {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.success-text {
+    color: var(--primary-green);
+    font-weight: 600;
+    margin: 1rem 0;
+}
+
+.info-text {
+    color: var(--primary-blue);
+    font-weight: 600;
+    margin: 1rem 0;
+}
+
+/* Timer Notifications */
+.timer-notification {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: var(--primary-blue);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1500;
+    animation: slideInRight 0.3s ease-out;
+    font-weight: 600;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .timer-settings {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .progress-ring {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .timer-display {
+        font-size: 2.5rem;
+    }
+    
+    .timer-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .completion-modal {
+        min-width: 90vw;
+        margin: 0 1rem;
+    }
+}
+</style>
+{% endblock %}

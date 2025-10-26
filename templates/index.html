@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Study Buddy{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <!-- Main Heading with Emoji -->
+        <h1 class="hero-title">🔥 Build Your Study Streak 🔥</h1>
+        
+        <!-- Subtitle -->
+        <h2 class="hero-subtitle">
+            Turn studying into a game and watch your grades soar!
+        </h2>
+        
+        <!-- Description -->
+        <p class="hero-description">
+            Study Buddy helps you build consistent study habits through gamification. 
+            Track your daily study sessions, maintain streaks, unlock achievement badges, 
+            and watch your progress grow every day!
+        </p>
+        
+        <!-- Call-to-Action Button -->
+        <div class="cta-buttons">
+            <a href="{{ url_for('timer') }}" class="btn btn-primary btn-large">
+                🎯 Start Studying Now
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                📊 View Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- About Me Section -->
+<div class="about-section">
+    <div class="container">
+        <h2 class="section-title">About the App</h2>
+        <div class="about-content">
+            <div class="about-card">
+                <div class="about-icon">👨‍💻</div>
+                <h3>Meet the Creator</h3>
+                <p><strong>Henry Miller</strong><br>
+                6th Grader at Princess Anne Middle School<br>
+                Virginia's 2nd Congressional District</p>
+            </div>
+            <div class="about-card">
+                <div class="about-icon">🎓</div>
+                <h3>The Mission</h3>
+                <p>Study Buddy was created to help students like me stay motivated and build better study habits. By turning studying into a game, we can make learning more fun and effective!</p>
+            </div>
+            <div class="about-card">
+                <div class="about-icon">🏆</div>
+                <h3>Congressional App Challenge</h3>
+                <p>This app was developed for the Congressional App Challenge 2025, showcasing how young developers can create solutions that help their peers succeed academically.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section">
+    <div class="container">
+        <h2 class="section-title">Study Buddy Features</h2>
+        
+        <div class="features-grid">
+            <!-- Feature 1 -->
+            <div class="feature-card">
+                <div class="feature-icon">⏰</div>
+                <h3>Study Timer</h3>
+                <p>Set focused study sessions with our built-in timer. Choose from 5, 10, 15, 20, or 30-minute sessions to match your attention span.</p>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="feature-card">
+                <div class="feature-icon">🔥</div>
+                <h3>Streak Tracking</h3>
+                <p>Build momentum by studying every day! Watch your streak grow and feel motivated to keep the fire burning.</p>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>Achievement Badges</h3>
+                <p>Unlock special badges as you hit milestones: Getting Started (3 days), Week Warrior (7 days), Study Champion (30 days), and more!</p>
+            </div>
+            
+            <!-- Feature 4 -->
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Progress Dashboard</h3>
+                <p>See your study stats, subject breakdown, and calendar view of your study history. Track your improvement over time!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Motivation Section -->
+<div class="motivation-section">
+    <div class="container">
+        <div class="motivation-content">
+            <h2 class="motivation-title">🌟 Start Your Journey Today! 🌟</h2>
+            <p class="motivation-text">
+                Every expert was once a beginner. Every pro was once an amateur. 
+                Every icon was once an unknown. The only thing that matters is that you START!
+            </p>
+            <div class="motivation-stats">
+                <div class="stat">
+                    <span class="stat-number">21</span>
+                    <span class="stat-label">Days to form a habit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">Minutes to get started</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">∞</span>
+                    <span class="stat-label">Potential to unlock</span>
+                </div>
+            </div>
+            <a href="{{ url_for('timer') }}" class="btn btn-primary btn-large">
+                🚀 Begin Your First Study Session
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
